@@ -1,0 +1,39 @@
+{
+  "chapters": [
+    {
+      "name": "test_chapter1",
+      "description": "descripiton1"
+    },
+    {
+      "name": "test_chapter2",
+      "description": ""
+    }
+  ],
+  "topics": [
+    {
+      "name": "test_topic1",
+      "chapter": "test_chapter1",
+      "note": "test_note1",
+      "date_of_study": "14.06.2024 10:19",
+      "last_repeat_date": "14.06.2024 10:19",
+      "repeat_counter": 0,
+      "linc_dict": {
+        "google": "https://www.google.ru/",
+        "yandex": "https://ya.ru/"
+      },
+      "questions": "test_question",
+      "answers": "test_answer"
+    },
+    {
+      "name": "test_topic2",
+      "chapter": "test_chapter1",
+      "note": "",
+      "date_of_study": "14.06.2024 10:19",
+      "last_repeat_date": "14.06.2024 10:19",
+      "repeat_counter": 0,
+      "linc_dict": null,
+      "questions": "",
+      "answers": ""
+    }
+  ]
+}
