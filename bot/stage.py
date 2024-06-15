@@ -1,5 +1,6 @@
+"""состояния коченчного автомата бота"""
 
-Stages = {
+STAGES = {
     'registration':
         (),
     'log_in':
@@ -64,6 +65,3 @@ Stages = {
             'to_repeat'
         )
 }
-
-class Automat:
-    pass

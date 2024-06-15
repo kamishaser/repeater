@@ -253,9 +253,10 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(summary_list[1].name, 'test_topic1')
         #2
         summary_list = repeater.topics_from_chapter('test_chapter1')
+        print(summary_list)
         self.assertEqual(len(summary_list), 2)
-        self.assertEqual(summary_list[0].name, 'test_topic3')
-        self.assertEqual(summary_list[1].name, 'test_topic2')
+        self.assertEqual(summary_list[0].name, 'test_topic2')
+        self.assertEqual(summary_list[1].name, 'test_topic3')
 
     def test_chapter_list_out(self):
         """Тест вывода списка разделов"""

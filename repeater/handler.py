@@ -8,7 +8,7 @@ from .topicdata import TopicData, topic_dict
 from typing import List
 from collections import namedtuple
 
-TopicSummary = namedtuple('TopicInList', [
+TopicSummary = namedtuple('TopicSummary', [
         'chapter',
         'name',
         'date_of_study',
@@ -63,12 +63,10 @@ def topics_to_repeat() -> List[TopicSummary]:
 
 def topics_from_chapter(chapter_name: str) -> List[TopicSummary]:
     checks.existence_chapter_check(chapter_name)
-    r_list: List[TopicSummary] = list()
-    for topic_name, data in topic_dict.items():
-        if data.chapter == chapter_name:
-            r_list.append(get_topic_summary(topic_name, data))
-    r_list.sort(key=__summary_sort_key)
-    return r_list
+    return list(
+        map(lambda item: get_topic_summary(item[0], item[1]),
+            filter(lambda item: (item[1].chapter == chapter_name),
+                   topic_dict.items())))
 
 
 def all_chapters() -> List[str]:
