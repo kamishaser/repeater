@@ -35,6 +35,9 @@ class menuMessage(BotMessage):
   def handle_answer(self, user_input):
     pass
 
+  def handle_button_callback(self, callback:str):
+    pass
+
 
 
 

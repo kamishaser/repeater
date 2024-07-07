@@ -4,6 +4,7 @@ from . import userChat
 import telebot
 import os
 import json
+import requests
 
 __bot = None
 def send_message(chat, text, markup): #отправление сообщения
@@ -29,4 +30,9 @@ def start():
       print('new chat')
       userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
 
-  __bot.polling(none_stop=True)
+  try:
+    __bot.polling(none_stop=True)
+  except requests.exceptions.Timeout:
+    print('потеряно интернет соединение')
+  except requests.exceptions.ConnectionError:
+    print('нет интернета')
