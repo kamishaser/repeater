@@ -71,4 +71,3 @@ def topics_from_chapter(chapter_name: str) -> List[TopicSummary]:
 
 def all_chapters() -> List[str]:
     return list(chapter_dict.keys())
-

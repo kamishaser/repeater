@@ -2,29 +2,20 @@ import datetime
 import logging
 
 import repeater
-#import bot
-import typing
+import bot
+import atexit
 
-
-import telebot
-from telebot import types
-
-bot = telebot.TeleBot('7104572018:AAFYGc8zeHcsJ5Am3dTnjO6VxT36RYW1XD0')
-
-
-@bot.message_handler(commands=['start', 'help'])
-def command(message):
-    print(type(message))
-    print(message.chat.id)
-
-@bot.message_handler()
-def userText(message):
-    print(type(message))
-
+@atexit.register
+def end():
+    repeater.database.save()
 
 def main():
+    repeater.database.load()
+    bot.bot.start()
     pass
+
+
 
 if __name__ == '__main__':
     main()
-bot.polling(none_stop=True)
+#bot.polling(none_stop=True)

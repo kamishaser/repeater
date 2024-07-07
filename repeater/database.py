@@ -53,7 +53,7 @@ def __collect_data():
     return dict1
 
 
-def save(file_name: str = 'data.json'):
+def save(file_name: str = 'data/repeater.json'):
     """сохранение всех данных repeater в json файле"""
     with open(file_name, 'w') as file:
         json.dump(__collect_data(), file, indent=2)
@@ -112,7 +112,7 @@ def __deploy_data(data)\
     conflict_list.extend(__deploy_topics(t_list))  # развёртывание тем
     return conflict_list
 
-def load(file_name: str = 'data.json') \
+def load(file_name: str = 'data/repeater.json') \
         -> List[ConflictData]:
     """загрузка данных из json файла
 
