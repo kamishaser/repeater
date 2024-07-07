@@ -4,19 +4,16 @@ from telebot import TeleBot
 from telebot import types
 
 
-class botMessage:
+class BotMessage:
     """базовый класс сообщения от бота"""
 
-    def __init__(self, message, stage):
-        self.message = message
-        self.stage = stage
+    def __init__(self, chat):
+        self.chat = chat
 
-    def getStafe(self):
-        return self.stage
 
     def handle_button_callback(self, callback:str):
         pass
 
-    def handle_answer(self, user_message):
+    def handle_answer(self, user_input):
         pass
 
