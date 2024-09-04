@@ -1,11 +1,10 @@
 """реализация классов сообщений от бота"""
-from bot.stage import STAGES
 from telebot import TeleBot
 from telebot import types
 from .. import bot
 
 
-class BotMessage:
+class Dialog:
     """базовый класс сообщения от бота"""
 
     def __init__(self, chat):

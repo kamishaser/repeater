@@ -1,11 +1,11 @@
 import repeater
-from .botMessage import BotMessage
+from .dialog import Dialog
 from . import repeaterCommand
 from telebot import types
 from bot import bot
 
 
-class menuMessage(BotMessage):
+class menuMessage(Dialog):
   def __init__(self, chat):
     super().__init__(chat)
     markup = types.InlineKeyboardMarkup()
@@ -51,26 +51,27 @@ class menuMessage(BotMessage):
     if callback == 'repeat':
       return repeaterCommand.TopicRepeating(self.chat)
     if callback == 'сhapter_list':
-      return self.list_of_all_chapters()
+      return self.get_list_of_all_chapters()
     if callback == 'topics_to_repeat':
-      return self.list_of_topics_to_repeat()
+      return self.get_list_of_topics_to_repeat()
 
-    pass
 
-  def list_of_all_chapters(self):
+  def get_list_of_all_chapters(self):
+    """получение списка всех разделов для для ответа на chapter_list"""
     ch_list = repeater.all_chapters()
     text = "список всех разделов:\n"
     counter = 1
     for name in ch_list:
       chapter = (f'{counter}) {name}  '
-                 f'{repeater.number_of_topics_in_chapter(name)} т.\n'
+                 f'({repeater.number_of_topics_in_chapter(name)} т.)\n'
                  f'{repeater.get_description_of_chapter(name)}\n')
       counter += 1
       text += chapter
     bot.send_message(self.chat, text)
     return menuMessage(self.chat)
 
-  def list_of_topics_to_repeat(self):
+  def get_list_of_topics_to_repeat(self):
+    """получение списка всех тем, которые пора повторять"""
     ch_list = repeater.topics_to_repeat()
     text = "тем для повторения:\n"
     counter = 1

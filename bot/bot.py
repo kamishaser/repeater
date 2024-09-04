@@ -1,5 +1,4 @@
 from . import botMessage
-from .stage import STAGES
 from . import userChat
 import telebot
 import logging
@@ -8,17 +7,70 @@ import json
 import requests
 
 __bot = None
-def send_message(chat, text, markup = None): #отправление сообщения
+
+def start():
+  """запуск бота"""
+  global __bot
+  assert os.path.exists('data/botData.json')
+  with open('data/botData.json', 'r') as file:
+    bot_data: dict = json.load(file)
+
+  assert bot_data.get('token')
+  __bot = telebot.TeleBot(bot_data['token'])
+
+  @__bot.message_handler(commands=['start'])
+  def command(message):
+    """обработка ввода команды пользователем"""
+    print('start')
+    if message.chat.id in userChat.chats:
+      userChat.chats[message.chat.id].menu()
+    else:
+      print('new chat')
+      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+
+  @__bot.message_handler()
+  def userText(message):
+    """обработка ввода текста пользователем"""
+    if message.chat.id in userChat.chats:
+
+      userChat.chats[message.chat.id].handle_user_text(message.text)
+    else:
+      print('new chat')
+      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+
+  @__bot.callback_query_handler(func=lambda callback: True)
+  def callback_message(callback):
+    """обработка нажатия на кнопку"""
+    if callback.message.chat.id in userChat.chats:
+      (userChat.chats[callback.message.chat.id].
+       handle_button(callback.message, callback.data))
+    else:
+      userChat.chats[callback.message.chat.id] = (
+        userChat.UserChat(callback.message.chat))
+
+  logging.getLogger('bot').log(logging.INFO, 'бот запущен')
+  try:
+    __bot.polling(none_stop=True)
+  except requests.exceptions.Timeout:
+    logging.getLogger('bot').log(logging.CRITICAL, 'потеряно интернет соединение')
+  except requests.exceptions.ConnectionError:
+    logging.getLogger('bot').log(logging.CRITICAL, 'нет интернета')
+
+
+def send_message(chat, text, markup = None):
+  """отправление сообщения в чат"""
   if __bot:
     return __bot.send_message(chat.id, text, reply_markup=markup)
 
 
-def delete_message(message): #отправление сообщения
+def delete_message(message):
+  """удаление сообщения из чата"""
   if __bot:
     if message:
       __bot.delete_message(message.chat.id, message.message_id)
 
 def delete_markup(message):
+  """удалить кнопки в сообщинии"""
   if __bot:
     if message:
       try:
@@ -30,6 +82,7 @@ def delete_markup(message):
   pass
 
 def delete_all_messages(chat):
+  """удалить все сообщения"""
   # messages_to_delete = []
   #
   # messages = __bot.get_chat_history(chat.id)
@@ -45,49 +98,6 @@ def delete_all_messages(chat):
   logging.getLogger('bot').error('функция полной отчистки чата недоработана')
 
 def error(chat, text):
+  """зарегистрировать ошибку"""
   send_message(chat, text)
   logging.getLogger('bot').error(text)
-
-def start():
-  global __bot
-  assert os.path.exists('data/botData.json')
-  with open('data/botData.json', 'r') as file:
-    bot_data: dict = json.load(file)
-
-  assert bot_data.get('token')
-  __bot = telebot.TeleBot(bot_data['token'])
-
-  @__bot.message_handler(commands=['start'])
-  def command(message):
-    print('start')
-    if message.chat.id in userChat.chats:
-      userChat.chats[message.chat.id].menu()
-    else:
-      print('new chat')
-      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
-
-  @__bot.message_handler()
-  def userText(message):
-    if message.chat.id in userChat.chats:
-
-      userChat.chats[message.chat.id].user_answer(message.text)
-    else:
-      print('new chat')
-      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
-
-  @__bot.callback_query_handler(func=lambda callback: True)
-  def callback_message(callback):
-    if callback.message.chat.id in userChat.chats:
-      (userChat.chats[callback.message.chat.id].
-       button(callback.message, callback.data))
-    else:
-      userChat.chats[callback.message.chat.id] = (
-        userChat.UserChat(callback.message.chat))
-
-  logging.getLogger('bot').log(logging.INFO, 'бот запущен')
-  try:
-    __bot.polling(none_stop=True)
-  except requests.exceptions.Timeout:
-    logging.getLogger('bot').log(logging.CRITICAL, 'потеряно интернет соединение')
-  except requests.exceptions.ConnectionError:
-    logging.getLogger('bot').log(logging.CRITICAL, 'нет интернета')

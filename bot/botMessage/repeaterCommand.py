@@ -1,10 +1,11 @@
-from .botMessage import BotMessage
+from .dialog import Dialog
 from telebot import types
 from bot import bot
 from . import menu
 import repeater
 
-class ChapterAddition(BotMessage):
+class ChapterAddition(Dialog):
+  """диалог добавления раздела"""
   def __init__(self, chat):
     super().__init__(chat)
     self.__stage = 0
@@ -18,6 +19,7 @@ class ChapterAddition(BotMessage):
       self.__chapter_name = user_input
       bot.send_message(self.chat, 'Введите описание для нового раздела')
       self.__stage = 1
+      return True
     elif self.__stage == 1:
       try:
         repeater.add_chapter(self.__chapter_name, user_input)
@@ -28,8 +30,7 @@ class ChapterAddition(BotMessage):
       else:
         bot.send_message(self.chat,
                          f'раздел {self.__chapter_name} успешно создан')
-      finally:
-        return menu.menuMessage(self.chat)
+        repeater.save()
 
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
@@ -38,7 +39,8 @@ class ChapterAddition(BotMessage):
 ###################################################33#########################
 ###################################################33#########################
 
-class ChapterChanging(BotMessage):
+class ChapterChanging(Dialog):
+  """диалог изменения раздела"""
   def __init__(self, chat):
     super().__init__(chat)
     self.__stage = 0
@@ -56,32 +58,35 @@ class ChapterChanging(BotMessage):
                         self.get_command_selection_markup())
         self.__stage = 1
         self.__chapter_name = user_input
+        return True
       else:
         bot.send_message(self.chat, 'раздел не найден')
-        return menu.menuMessage(self.chat)
 
     elif self.__stage == 2:
-      return self.change_name(user_input)
+      self.change_name(user_input)
     elif self.__stage == 3:
-      return self.change_description(user_input)
+      self.change_description(user_input)
     elif self.__stage == 4:
-      return self.join(user_input)
+      self.join(user_input)
 
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
     if callback == 'change_name':
       self.sendActive('введите новое имя раздела')
       self.__stage = 2
+      return True
     elif callback == 'change_description':
       bot.send_message(self.chat, 'старое описание раздела:\n\n' +
                        repeater.get_description_of_chapter(self.__chapter_name))
       self.sendActive('введите новое описание раздела')
       self.__stage = 3
+      return True
     elif callback == 'join':
       self.sendActive('введите имя второго раздела')
       self.__stage = 4
+      return True
     elif callback == 'delete':
-      return self.delete_chapter()
+      self.delete_chapter()
 
 
   def change_name(self, new_name:str):
@@ -95,8 +100,7 @@ class ChapterChanging(BotMessage):
       bot.send_message(self.chat,
                        f'раздел "{self.__chapter_name}" успешно переименован '
                        f'как "{new_name}"')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
   def change_description(self, new_description):
     try:
       repeater.change_description_of_chapter(self.__chapter_name, new_description)
@@ -105,8 +109,7 @@ class ChapterChanging(BotMessage):
     else:
       bot.send_message(self.chat,
                        f'описание раздела изменено')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def join(self, second_chapter):
     """объединить разделы"""
@@ -120,9 +123,7 @@ class ChapterChanging(BotMessage):
     else:
       bot.send_message(self.chat,
                        f'разделы успешно объединены')
-    finally:
-      return menu.menuMessage(self.chat)
-    pass
+      repeater.save()
 
   def delete_chapter(self):
     try:
@@ -132,8 +133,7 @@ class ChapterChanging(BotMessage):
     else:
       bot.send_message(self.chat,
                        f'раздел {self.__chapter_name} успешно удалён')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def get_command_selection_markup(self):
     """получить меню действий"""
@@ -151,17 +151,11 @@ class ChapterChanging(BotMessage):
     markup.row(add_topic, change_topic)
     return markup
 
-  ###################################################33#########################
-  ###################################################33#########################
-  ###################################################33#########################
-  ###################################################33#########################
-  ###################################################33#########################
-  ###################################################33#########################
-
 ###################################################33#########################
 ###################################################33#########################
 
-class TopicAddition(BotMessage):
+class TopicAddition(Dialog):
+  """диалог добавления темы"""
   def __init__(self, chat):
     super().__init__(chat)
     self.__stage = 0
@@ -174,27 +168,28 @@ class TopicAddition(BotMessage):
       self.__topic_name = user_input
       bot.send_message(self.chat, 'Введите название раздела')
       self.__stage = 1
+      return True
     elif self.__stage == 1:
       try:
         repeater.add_topic(self.__topic_name, user_input)
       except (repeater.TopicError, repeater.TopicError) as exc:
         bot.send_message(self.chat, f'Ошибка создания темы: {exc}')
-        return menu.menuMessage(self.chat)
       except repeater.CorrectnessError as exc:
         bot.send_message(self.chat, f'имя некорректно: {exc}')
-        return menu.menuMessage(self.chat)
       else:
         bot.send_message(self.chat,
                          f'тема "{self.__topic_name}" успешно создана'
                          f'\n\nвведите текст темы')
+        repeater.save()
         self.__stage = 2
+        return True
     elif self.__stage == 2:
       try:
         repeater.change_note_of_topic(self.__topic_name, user_input)
       except repeater.TopicError as exc:
         bot.error(self.chat, f'ошибка ввода описания: {exc}')
-      finally:
-        return menu.menuMessage(self.chat)
+      else:
+        repeater.save()
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
     pass
@@ -202,7 +197,9 @@ class TopicAddition(BotMessage):
 ###################################################33#########################
 ###################################################33#########################
 
-class TopicChanging(BotMessage):
+class TopicChanging(Dialog):
+  """диалог изменения темы"""
+
   def __init__(self, chat):
     super().__init__(chat)
     self.__stage = 0
@@ -220,42 +217,47 @@ class TopicChanging(BotMessage):
                         self.get_command_selection_markup())
         self.__stage = 'commandSelection'
         self.__chapter_name = user_input
+        return True
       else:
         bot.send_message(self.chat, 'тема не найдена')
-        return menu.menuMessage(self.chat)
 
     elif self.__stage == 'name':
-      return self.change_name(user_input)
+      self.change_name(user_input)
     elif self.__stage == 'chapter':
-      return self.change_chapter(user_input)
+      self.change_chapter(user_input)
     elif self.__stage == 'note':
-      return self.change_note(user_input)
+      self.change_note(user_input)
     elif self.__stage == 'duplicate':
-      return self.duplicate(user_input)
+      self.duplicate(user_input)
     elif self.__stage == 'delete':
-      return self.delete_topic()
+      self.delete_topic()
 
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
     if callback == 'name':
       self.sendActive('введите новое имя темы')
       self.__stage = 'name'
+      return True
     elif callback == 'chapter':
       self.sendActive('введите имя второго раздела')
       self.__stage = 'chapter'
+      return True
     elif callback == 'duplicate':
       self.sendActive('введите название дубля')
       self.__stage = 'duplicate'
+      return True
     elif callback == 'note':
       bot.send_message(self.chat, 'старый текст:\n\n' +
                        repeater.get_note_of_topic(self.__topic_name))
       self.sendActive('введите новый текст темы')
       self.__stage = 'note'
+      return True
     elif callback == 'delete':
-      return self.delete_topic()
+      self.delete_topic()
 
 
   def change_name(self, new_name:str):
+    """переименовать тему"""
     try:
       repeater.change_name_of_topic(self.__chapter_name, new_name)
     except repeater.TopicError as exc:
@@ -266,10 +268,10 @@ class TopicChanging(BotMessage):
       bot.send_message(self.chat,
                        f'тема "{self.__chapter_name}" успешно переименована '
                        f'как "{new_name}"')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def change_chapter(self, new_name:str):
+    """сменить раздел темы"""
     try:
       repeater.change_chapter_of_topic(self.__chapter_name, new_name)
     except (repeater.TopicError, repeater.ChapterError) as exc:
@@ -280,10 +282,10 @@ class TopicChanging(BotMessage):
       bot.send_message(self.chat,
                        f'тема "{self.__chapter_name}" успешно перемещена в '
                        f'раздел "{new_name}"')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def duplicate(self, new_name:str):
+    """дублировать тему"""
     try:
       repeater.duplicate_topic(self.__chapter_name, new_name)
     except repeater.TopicError as exc:
@@ -294,10 +296,10 @@ class TopicChanging(BotMessage):
       bot.send_message(self.chat,
                        f'тема "{self.__chapter_name}" успешно дублирована '
                        f'как "{new_name}"')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def change_note(self, new_note):
+    """изменить описание"""
     try:
       repeater.change_note_of_topic(self.__chapter_name, new_note)
     except repeater.TopicError as exc:
@@ -305,10 +307,10 @@ class TopicChanging(BotMessage):
     else:
       bot.send_message(self.chat,
                        f'текст темы изменён')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def delete_topic(self):
+    """удалить тему"""
     try:
       repeater.del_topic(self.__chapter_name)
     except repeater.TopicError as exc:
@@ -316,8 +318,7 @@ class TopicChanging(BotMessage):
     else:
       bot.send_message(self.chat,
                        f'тема "{self.__chapter_name}" успешно удалена')
-    finally:
-      return menu.menuMessage(self.chat)
+      repeater.save()
 
   def get_command_selection_markup(self):
     """получить меню действий"""
@@ -341,7 +342,8 @@ class TopicChanging(BotMessage):
   ###################################################33#########################
 
 
-class ListOfTopicsInChapterPrinting(BotMessage):
+class ListOfTopicsInChapterPrinting(Dialog):
+  """диалог вывода всех тем в определённо разделе"""
   def __init__(self, chat):
     super().__init__(chat)
     bot.send_message(self.chat, 'Введите название раздела')
@@ -354,13 +356,12 @@ class ListOfTopicsInChapterPrinting(BotMessage):
       bot.send_message(self.chat, f'раздел не найден: {exc}')
     except repeater.TopicError as exc:
       bot.send_message(self.chat, f'ошибка: : {exc}')
-    finally:
-      return menu.menuMessage(self.chat)
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
     pass
 
   def printList(self, chapter):
+    """вывести список разделов"""
     counter = 1
     text = f'список тем в разделе {chapter}:\n'
     t_list = repeater.topics_from_chapter(chapter)
@@ -375,7 +376,9 @@ class ListOfTopicsInChapterPrinting(BotMessage):
   ###################################################33#########################
   ###################################################33#########################
 
-class TopicRepeating(BotMessage):
+class TopicRepeating(Dialog):
+  """диалог повторения темы"""
+
   def __init__(self, chat):
     super().__init__(chat)
     self.__stage = 0
@@ -388,9 +391,9 @@ class TopicRepeating(BotMessage):
         self.send_topic(user_input)
       except repeater.TopicError as exc:
         bot.send_message(self.chat, f'тема не найдена: {exc}')
-        return menu.menuMessage(self.chat)
       else:
         self.__stage = 1
+        return True
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
     if callback == 'repeat':
@@ -399,11 +402,11 @@ class TopicRepeating(BotMessage):
       except repeater.TopicError:
         bot.send_message(self.chat, 'досрочное повторение')
       finally:
-        return menu.menuMessage(self.chat)
+        repeater.save()
     if callback == 'cancel':
       bot.send_message('отмена')
-      return menu.menuMessage(self.chat)
   def send_topic(self, name):
+    """вывести информацию по теме"""
     self.topic_name = name
     note = repeater.get_note_of_topic(name)
     markup = types.InlineKeyboardMarkup()
