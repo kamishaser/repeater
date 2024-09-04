@@ -57,13 +57,6 @@ def new_name_of_topic_check(name: str):
     name_correct_check(name)
 
 
-def existence_topic_check(name: str):
-    """Проверка наличия темы {name}
-
-    В случае отсутствия темы с таким названиет бросает TopicError"""
-    if name not in topic_dict:
-        raise TopicError(f"темы {name} не существует")
-
 
 def new_name_of_chapter_check(name: str):
     """Проверка названия нового раздела
@@ -74,11 +67,6 @@ def new_name_of_chapter_check(name: str):
     if name in chapter_dict:
         raise ChapterError(f"раздел {name} уже существует. Название должно быть уникальным")
     name_correct_check(name)
-
-
-def existence_chapter_check(name: str):
-    if name not in chapter_dict or name is None:
-        raise ChapterError(f"раздела {name} не существует")
 
 
 
@@ -98,11 +86,17 @@ def number_of_chapter() -> int:
     return len(chapter_dict)
 
 
-def chapter_exist(name: str) -> bool:
+def chapter_exist(name: str, raise_exception = False) -> bool | None:
+    if raise_exception:
+        if chapter_dict.get(name) is None:
+            raise ChapterError
     return chapter_dict.get(name) is not None
 
 
-def topic_exist(name: str) -> bool:
+def topic_exist(name: str, raise_exception = False) -> bool | None:
+    if raise_exception:
+        if topic_dict.get(name) is None:
+            raise TopicError
     return topic_dict.get(name) is not None
 
 

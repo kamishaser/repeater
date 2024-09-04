@@ -17,7 +17,7 @@ TopicSummary = namedtuple('TopicSummary', [
 
 def get_topic_summary(
         name: str, topic: typing.Optional[TopicData] = None) -> TopicSummary:
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     """получение сводки по теме"""
     if topic is None:
         topic = topic_dict[name]
@@ -32,7 +32,7 @@ def get_topic_summary(
 ##############################################################################
 
 
-def __sort_key(name) -> datetime.datetime:
+def __sort_key(name) -> str:
     """получение ключа сортировки сводок по времени повторения"""
     return datetime.datetime.strftime(
         topic_dict[name].last_repeat_date, '%d.%m.%Y %H:%M')
@@ -40,7 +40,7 @@ def __sort_key(name) -> datetime.datetime:
 
 def record_repeat(name):
     """фиксация повторения темы"""
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     topic = topic_dict[name]
     if checks.is_it_time_to_repeat(topic.last_repeat_date, topic.repeat_counter):
         topic.last_repeat_date = datetime.datetime.now()
@@ -63,7 +63,7 @@ def topics_to_repeat() -> List[str]:
 
 
 def topics_from_chapter(chapter_name: str) -> List[str]:
-    checks.existence_chapter_check(chapter_name)
+    checks.chapter_exist(chapter_name, True)
     return list(
         map(lambda item: item[0],
             filter(lambda item: (item[1].chapter == chapter_name),

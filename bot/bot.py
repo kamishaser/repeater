@@ -6,7 +6,7 @@ import os
 import json
 import requests
 
-__bot = None
+__bot : telebot.TeleBot | None = None
 
 def start():
   """запуск бота"""
@@ -60,7 +60,10 @@ def start():
 def send_message(chat, text, markup = None):
   """отправление сообщения в чат"""
   if __bot:
-    return __bot.send_message(chat.id, text, reply_markup=markup)
+    if markup is not None:
+      return __bot.send_message(chat.id, text, reply_markup=markup)
+    else:
+      __bot.send_message(chat.id, text)
 
 
 def delete_message(message):
@@ -80,6 +83,17 @@ def delete_markup(message):
         logging.getLogger('bot').error(
           'ApyTelegramException при удалении кнопок')
   pass
+
+def edit_message_text(message, text, add = False):
+  if __bot:
+    if message:
+      try:
+        if add:
+          text = message.text + text
+        __bot.edit_message_text(text, message.chat.id, message.id)
+      except telebot.apihelper.ApiException:
+        logging.getLogger('bot').error(
+          'ApyTelegramException при удалении кнопок')
 
 def delete_all_messages(chat):
   """удалить все сообщения"""

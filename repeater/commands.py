@@ -16,7 +16,7 @@ def add_topic(
     link_dict: Optional[Dict[str, str]] = None,  # список ссылок
 ) -> TopicData:
     checks.new_name_of_topic_check(name)
-    checks.existence_chapter_check(chapter)
+    checks.chapter_exist(chapter, True)
     """Добавление новой темы
     
     name : str - имя темы
@@ -50,7 +50,7 @@ def change_name_of_topic(old_name: str, new_name: str):
 
     if old_name == new_name:
         return
-    checks.existence_topic_check(old_name)
+    checks.chapter_exist(old_name, True)
     checks.new_name_of_topic_check(new_name)
     topic_dict[new_name] = topic_dict[old_name]
     del topic_dict[old_name]
@@ -61,8 +61,8 @@ def change_chapter_of_topic(topic_name: str, new_chapter_name: str):
 
     topic_name: str - имя темы
     new_chapter_name: str - новое имя раздела"""
-    checks.existence_topic_check(topic_name)
-    checks.existence_chapter_check(new_chapter_name)
+    checks.topic_exist(topic_name, True)
+    checks.chapter_exist(new_chapter_name, True)
     topic_dict[topic_name].chapter = new_chapter_name
 
 
@@ -72,7 +72,7 @@ def change_note_of_topic(name: str, note: str):
     name - имя темы
     note - конспект по теме
     """
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     topic_dict[name].note = note
 
 
@@ -82,7 +82,7 @@ def change_questions_of_topic(name: str, questions: str):
     name: str - имя темы
     questions: str - вопросы по теме
     """
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     topic_dict[name].questions = questions
 
 
@@ -91,7 +91,7 @@ def change_answers_of_topic(name: str, answers: str):
 
     name: str - имя темы
     answers: str - ответы на вопросы по теме"""
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     topic_dict[name].answers = answers
 
 
@@ -101,7 +101,7 @@ def change_linc_dict_of_topic(name: str, linc_dict: Dict[str, str]):
     name: str - имя темы
     linc_dict - словарь ссылок формата [имя (str), url (str)]
     """
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     for key, value in linc_dict.items():
         checks.name_correct_check(name)
     topic_dict[name].link_dict = linc_dict
@@ -113,7 +113,7 @@ def add_linc_in_topic(topic_name: str, linc_name: str, linc: str):
     topic_name: str
     linc_name: str - название ссылки
     linc: str - url - ссылки"""
-    checks.existence_topic_check(topic_name)
+    checks.topic_exist(topic_name, True)
     checks.name_correct_check(linc_name)
     topic_dict[topic_name].link_dict[linc_name] = linc
     # проверка уникальности ссылки в теме не предусмотренна
@@ -123,7 +123,7 @@ def del_topic(name: str):
     """удаление темы
 
     name: str: имя темы"""
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     del topic_dict[name]
 
 
@@ -140,7 +140,7 @@ def change_name_of_chapter(old_name: str, name: str):
 
     Сменяет имя раздела {old_name} на новое {name}
     Затем обновляет поле chapter во всех темах, состоящих в данном разделе"""
-    checks.existence_chapter_check(old_name)
+    checks.chapter_exist(old_name, True)
     checks.new_name_of_chapter_check(name)
     chapter_dict[name] = chapter_dict[old_name]
     del chapter_dict[old_name]
@@ -152,7 +152,7 @@ def change_description_of_chapter(name: str, description : str):
     """изменение описания раздела
 
     Устанавливает описание {description} в раздел {name}"""
-    checks.existence_chapter_check(name)
+    checks.chapter_exist(name, True)
     chapter_dict[name].description = description
 
 
@@ -161,7 +161,7 @@ def del_chapter(name: str):
 
     Проверяет наличие тем в разделе {name}
     Если их нет - удаляет раздел, иначе бросает ChapterError """
-    checks.existence_chapter_check(name)
+    checks.chapter_exist(name, True)
     for topic in topic_dict.values():
         if topic.chapter == name:
             raise checks.ChapterError(
@@ -171,26 +171,26 @@ def del_chapter(name: str):
 
 def get_description_of_chapter(name: str):
     """получить описания раздела"""
-    checks.existence_chapter_check(name)
+    checks.chapter_exist(name, True)
     return chapter_dict[name].description
 
 def get_note_of_topic(name: str):
     """получить описания раздела"""
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     return topic_dict[name].note
 
 def get_date_of_study(name: str):
     """получение даты изучения темы"""
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     return topic_dict[name].date_of_study
 
 def get_last_repeat_date(name: str):
     """получение даты последнего повторения темы"""
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     return topic_dict[name].last_repeat_date
 
 def duplicate_topic(name : str, name_of_double : str):
-    checks.existence_topic_check(name)
+    checks.topic_exist(name, True)
     chapter = topic_dict[name].chapter
     note = topic_dict[name].note
     add_topic(name_of_double, chapter, note)

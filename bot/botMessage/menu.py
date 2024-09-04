@@ -22,15 +22,17 @@ class menuMessage(Dialog):
     markup.row(add_topic, change_topic)
     topics_to_repeat = types.InlineKeyboardButton(
       'список тем для повторения', callback_data='topics_to_repeat')
-    choice_topic_to_repeat = types.InlineKeyboardButton(
-      'повторить тему', callback_data='repeat')
-    markup.row(topics_to_repeat, choice_topic_to_repeat)
     topics_in_chapter = types.InlineKeyboardButton(
       'список тем в разделе', callback_data='topics_in_chapter')
+    markup.row(topics_to_repeat, topics_in_chapter)
+    choice_topic_to_repeat = types.InlineKeyboardButton(
+      'повторить тему', callback_data='repeat')
     chapter_list = types.InlineKeyboardButton(
       'список разделов', callback_data='сhapter_list')
-    markup.row(topics_in_chapter, chapter_list)
-    self.sendActive('меню', markup)
+    other = types.InlineKeyboardButton(
+      '...', callback_data='other')
+    markup.row(choice_topic_to_repeat, chapter_list, other)
+    self.send_message('меню', markup)
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
@@ -39,20 +41,28 @@ class menuMessage(Dialog):
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
     if callback == 'add_chapter':
+      self.setPressedButtonValue('добавить раздел')
       return repeaterCommand.ChapterAddition(self.chat)
     if callback == 'change_chapter':
+      self.setPressedButtonValue('изменить раздел')
       return repeaterCommand.ChapterChanging(self.chat)
     if callback == 'add_topic':
+      self.setPressedButtonValue('добавить тему')
       return repeaterCommand.TopicAddition(self.chat)
     if callback == 'change_topic':
+      self.setPressedButtonValue('изменить тему')
       return repeaterCommand.TopicChanging(self.chat)
     if callback == 'topics_in_chapter':
+      self.setPressedButtonValue('список тем в разделе')
       return repeaterCommand.ListOfTopicsInChapterPrinting(self.chat)
     if callback == 'repeat':
+      self.setPressedButtonValue('повторить тему')
       return repeaterCommand.TopicRepeating(self.chat)
     if callback == 'сhapter_list':
+      self.setPressedButtonValue('список разделов')
       return self.get_list_of_all_chapters()
     if callback == 'topics_to_repeat':
+      self.setPressedButtonValue('список тем для повторения')
       return self.get_list_of_topics_to_repeat()
 
 
@@ -67,7 +77,7 @@ class menuMessage(Dialog):
                  f'{repeater.get_description_of_chapter(name)}\n')
       counter += 1
       text += chapter
-    bot.send_message(self.chat, text)
+    self.send_message(text)
     return menuMessage(self.chat)
 
   def get_list_of_topics_to_repeat(self):
@@ -81,6 +91,6 @@ class menuMessage(Dialog):
                 f'Повторена {repeater.get_last_repeat_date(name).strftime("%d.%m.%Y")}\n')
       counter += 1
       text += chapter
-    bot.send_message(self.chat, text)
+    self.send_message(text)
     return menuMessage(self.chat)
 
