@@ -32,10 +32,10 @@ def get_topic_summary(
 ##############################################################################
 
 
-def __summary_sort_key(summary: TopicSummary) -> datetime.datetime:
+def __sort_key(name) -> datetime.datetime:
     """получение ключа сортировки сводок по времени повторения"""
-    return datetime.datetime.strptime(
-        summary.date_of_next_repeat, '%d.%m.%Y %H:%M')
+    return datetime.datetime.strftime(
+        topic_dict[name].last_repeat_date, '%d.%m.%Y %H:%M')
 
 
 def record_repeat(name):
@@ -46,25 +46,26 @@ def record_repeat(name):
         topic.last_repeat_date = datetime.datetime.now()
         topic.repeat_counter += 1
     else:
-        raise checks.TopicError("нельзя повторять зафиксировать повторение темы раньше времени")
+        topic.last_repeat_date = datetime.datetime.now()
+        raise checks.TopicError("тема повторена раньше времени. Счётчик не увеличился")
 
 ##############################################################################
 
 
-def topics_to_repeat() -> List[TopicSummary]:
+def topics_to_repeat() -> List[str]:
     """вывод списка тем подлежащих повторению"""
-    r_list: List[TopicSummary] = list()
+    r_list: List[str] = list()
     for name, data in topic_dict.items():
         if checks.is_it_time_to_repeat(data.date_of_study, data.repeat_counter):
-            r_list.append(get_topic_summary(name))
-    r_list.sort(key=__summary_sort_key)
+            r_list.append(name)
+    r_list.sort(key=__sort_key)
     return r_list
 
 
-def topics_from_chapter(chapter_name: str) -> List[TopicSummary]:
+def topics_from_chapter(chapter_name: str) -> List[str]:
     checks.existence_chapter_check(chapter_name)
     return list(
-        map(lambda item: get_topic_summary(item[0], item[1]),
+        map(lambda item: item[0],
             filter(lambda item: (item[1].chapter == chapter_name),
                    topic_dict.items())))
 

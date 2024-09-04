@@ -3,13 +3,13 @@
 STAGES = {
     'registration':
         (),
-    'log_in':
-        (
-            'identification',
-            'authentication',
-            #тут можно придумать двухфакторную аутентификацию с вводом имени любой темы
-            'authorisation'
-        ),
+    # 'log_in':
+    #     (
+    #         'identification',
+    #         'authentication',
+    #         #тут можно придумать двухфакторную аутентификацию с вводом имени любой темы
+    #         'authorisation'
+    #     ),
     'add_topic':
         (
             'add_name',
@@ -20,13 +20,13 @@ STAGES = {
         ),
     'change_topic':
         (
-            'change_name',
-            'change_chapter',
-            'change_note',
+            'name',
+            'chapter',
+            'note',
             'change_question',
             'change_answer',
-            'split_topic',
-            'delete_topic'
+            'duplicate',
+            'delete'
         ),
     'print_list_of_topics':
         (

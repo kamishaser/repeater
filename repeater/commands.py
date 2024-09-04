@@ -169,8 +169,34 @@ def del_chapter(name: str):
                 "в котором состоит хотя бы одна тема")
     del chapter_dict[name]
 
+def get_description_of_chapter(name: str):
+    """получить описания раздела"""
+    checks.existence_chapter_check(name)
+    return chapter_dict[name].description
+
+def get_note_of_topic(name: str):
+    """получить описания раздела"""
+    checks.existence_topic_check(name)
+    return topic_dict[name].note
+
+def get_date_of_study(name: str):
+    """получение даты изучения темы"""
+    checks.existence_topic_check(name)
+    return topic_dict[name].date_of_study
+
+def get_last_repeat_date(name: str):
+    """получение даты последнего повторения темы"""
+    checks.existence_topic_check(name)
+    return topic_dict[name].last_repeat_date
+
+def duplicate_topic(name : str, name_of_double : str):
+    checks.existence_topic_check(name)
+    chapter = topic_dict[name].chapter
+    note = topic_dict[name].note
+    add_topic(name_of_double, chapter, note)
 
 def clear():
     """полная отчистка repeater"""
     chapter_dict.clear()
     topic_dict.clear()
+

@@ -85,7 +85,13 @@ def existence_chapter_check(name: str):
 def number_of_topics() -> int:
     """количество тем"""
     return len(topic_dict)
-
+def number_of_topics_in_chapter(chapter : str) -> int:
+    """количество тем в разделе"""
+    counter = 0
+    for topic in topic_dict.values():
+        if topic.chapter == chapter:
+            counter += 1
+    return counter
 
 def number_of_chapter() -> int:
     """количество разделов"""

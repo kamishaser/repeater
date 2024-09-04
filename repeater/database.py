@@ -55,7 +55,7 @@ def __collect_data():
 
 def save(file_name: str = 'data/repeater.json'):
     """сохранение всех данных repeater в json файле"""
-    with open(file_name, 'w') as file:
+    with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(__collect_data(), file, indent=2)
 
 
