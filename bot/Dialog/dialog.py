@@ -3,6 +3,7 @@ import telebot.types
 from telebot import TeleBot
 from telebot import types
 from .. import bot
+import repeater
 
 
 class Dialog:
@@ -41,6 +42,36 @@ class Dialog:
         """удаления значения последней нажатой кнопки"""
         if len(self.message_list) > 0:
             bot.delete_markup(self.message_list[-1])#удаление неактуальных кнопок
+
+    def get_tip_on_choice_topic_to_repeat(self) -> telebot.types.ReplyKeyboardMarkup:
+        """список кнопок - вариантов выбора темы для повторения"""
+        repeater.handler.topics_to_repeat()
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard = True)
+        counter = 0
+        topics = repeater.topics_to_repeat()
+        row = []
+        for topic in topics:
+            row.append(telebot.types.KeyboardButton(topic))
+            counter += 1
+            if counter > 5:
+                break
+        markup.add(*row)
+        return markup
+
+    def get_tip_on_choice_chapter(self) -> telebot.types.ReplyKeyboardMarkup:
+        """список кнопок - вариантов выбора раздела"""
+        repeater.handler.topics_to_repeat()
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard = True)
+        counter = 0
+        topics = repeater.all_chapters()
+        row = []
+        for topic in topics:
+            row.append(telebot.types.KeyboardButton(topic))
+            counter += 1
+            if counter > 5:
+                break
+        markup.add(*row)
+        return markup
 
 
 

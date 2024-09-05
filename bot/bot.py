@@ -91,8 +91,7 @@ def delete_markup(message):
   if __bot:
     if message:
       try:
-        __bot.edit_message_reply_markup(message.chat.id, message.id,
-                                        telebot.types.InlineKeyboardMarkup())
+        __bot.edit_message_reply_markup(message.chat.id, message.id, None)
       except telebot.apihelper.ApiException:
         logging.getLogger('bot').error(
           'ApyTelegramException при удалении кнопок')
@@ -144,3 +143,4 @@ def load_data(data : telebot.types.Document):
   file_info = __bot.get_file(data.file_id)
   downloaded_file = __bot.download_file(file_info.file_path)
   return repeater.database.load_from_json_str(downloaded_file)
+

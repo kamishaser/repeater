@@ -46,7 +46,8 @@ class ChapterChanging(Dialog):
     #stages: 0) name 1) commandSelection
     #2) name 3) description 4) join 5) delete
     self.__chapter_name = ''
-    self.send_message('Введите название раздела')
+    self.send_message('Введите название раздела',
+                      self.get_tip_on_choice_chapter())
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
@@ -165,7 +166,8 @@ class TopicAddition(Dialog):
     """обработать пользовательский ввод"""
     if self.__stage == 0:
       self.__topic_name = user_input
-      self.send_message('Введите название раздела')
+      self.send_message('Введите название раздела',
+                        self.get_tip_on_choice_chapter())
       self.__stage = 1
       return True
     elif self.__stage == 1:
@@ -204,7 +206,8 @@ class TopicChanging(Dialog):
     #stages: 0) name 1) commandSelection
     #2) name 3) chapter 4) note 5) double 6) delete
     self.__topic_name = ''
-    self.send_message('Введите название темы')
+    self.send_message('Введите название темы',
+                      self.get_tip_on_choice_topic_to_repeat())
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
@@ -237,7 +240,8 @@ class TopicChanging(Dialog):
       self.__stage = 'name'
       return True
     elif callback == 'chapter':
-      self.send_message('введите имя второго раздела')
+      self.send_message('введите имя второго раздела',
+                        self.get_tip_on_choice_chapter())
       self.__stage = 'chapter'
       return True
     elif callback == 'duplicate':
@@ -380,7 +384,8 @@ class TopicRepeating(Dialog):
   def __init__(self, chat):
     super().__init__(chat)
     self.__stage = 0
-    self.send_message('Введите название темы')
+    self.send_message('Введите название темы',
+                      self.get_tip_on_choice_topic_to_repeat())
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
