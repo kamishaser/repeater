@@ -1,4 +1,5 @@
 """реализация классов сообщений от бота"""
+import telebot.types
 from telebot import TeleBot
 from telebot import types
 from .. import bot
@@ -18,6 +19,10 @@ class Dialog:
 
     def handle_answer(self, user_input):
         """обработать пользовательский ввод"""
+        pass
+
+    def handle_document(self, document: telebot.types.Document):
+        """обработать пользовательский документ"""
         pass
 
     def send_message(self, text, markup = None):

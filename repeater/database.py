@@ -3,6 +3,8 @@
     save(),
     load(replace) загрузка из файла
 """
+import logging
+
 from .topicdata import TopicData, topic_dict
 from .chapter import Chapter, chapter_dict
 from typing import List, Dict, Optional
@@ -69,8 +71,8 @@ def __deploy_chapters(c_list)\
             name = i['name']
             if chapter_dict.get(name) is not None:
                 conflict_list.append(ConflictData(name, 1))
-                name = '_' + name
-            chapter_dict[name] = Chapter(i)
+            else:
+                chapter_dict[name] = Chapter(i)
         except KeyError:
             conflict_list.append(ConflictData(name, 2))
     return conflict_list
@@ -86,19 +88,15 @@ def __deploy_topics(t_list)\
             name = i['name']
             if topic_dict.get(name) is not None:
                 conflict_list.append(ConflictData(name, 3))
-                name = '_' + name
-                chapter_name = i['chapter']
-                if chapter_dict.get(chapter_name) is None:
-                    conflict_list.append(ConflictData('', 5))
-                    chapter_name = '_' + chapter_name
-                    i['chapter'] = chapter_name
-            topic_dict[name] = TopicData(i)
+            elif chapter_dict.get(i['chapter']) is None:
+                conflict_list.append(ConflictData('name', 5))
+            else:
+                topic_dict[name] = TopicData(i)
         except KeyError:
             conflict_list.append(ConflictData(name, 4))
     return conflict_list
 
-def __deploy_data(data)\
-        -> List[ConflictData]:
+def __deploy_data(data) -> List[ConflictData]:
     """развёртывание загруженных из json данных"""
     conflict_list: List[ConflictData] = list()
 
@@ -123,5 +121,37 @@ def load(file_name: str = 'data/repeater.json') \
     with open(file_name, 'r') as file:
         data = json.load(file)
     return __deploy_data(data)
+
+def load_from_json_str(data):
+    """загрузка из строки"""
+    try:
+        dict1 = json.loads(data)
+    except Exception as exc: #необходимо добавить более корректное разделение
+        logging.getLogger('repeater').error('ошибка загрузки', exc_info=True)
+        raise DatabaseError('ошибка считывания json')
+
+    conflicts = __deploy_data(dict1)
+    if len(conflicts) == 0:
+        return None
+    text = "При загрузке возникли конфликты:"
+    counter = 1
+    for conflict in conflicts:
+        con_type = ""
+        if conflict.conflict_type == 0:
+            con_type = 'неизвестная ошибка'
+        elif conflict.conflict_type == 1:
+            con_type = 'совпадение имён разделов'
+        elif conflict.conflict_type == 2:
+            con_type = 'ошибка загрузки раздела'
+        elif conflict.conflict_type == 3:
+            con_type = 'совпадение имён тем'
+        elif conflict.conflict_type == 4:
+            con_type = 'ошибка загрузки темы'
+        elif conflict.conflict_type == 5:
+            con_type = 'не найден раздел, в котором состоит тема'
+        text += f'{counter}) {con_type}: "{conflict.name}"\n'
+        counter += 1
+    return text
+
 
 

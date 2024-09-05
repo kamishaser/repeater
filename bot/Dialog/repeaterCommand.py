@@ -76,9 +76,9 @@ class ChapterChanging(Dialog):
       self.__stage = 2
       return True
     elif callback == 'change_description':
+      self.setPressedButtonValue('изменить описание')
       self.send_message('старое описание раздела:\n\n' +
                        repeater.get_description_of_chapter(self.__chapter_name))
-      self.setPressedButtonValue('изменить описание')
       self.send_message('введите новое описание раздела')
       self.__stage = 3
       return True

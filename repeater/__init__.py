@@ -1,6 +1,7 @@
 """Пакет repeater реализует систему подразделов и тем
 предназначенную для конспектирования и своевременного повторения изучаемого материала """
 __version__ = '1.0.1'
+import logging
 
 
 from .checks import (
@@ -17,7 +18,7 @@ from .commands import (
     change_questions_of_topic, change_answers_of_topic,
     change_note_of_topic, change_linc_dict_of_topic, add_linc_in_topic,
 
-    add_chapter, del_chapter,
+    add_chapter, del_chapter, clear,
     change_name_of_chapter, change_description_of_chapter,
 
     get_description_of_chapter,
@@ -29,5 +30,13 @@ from .handler import (TopicSummary, get_topic_summary, record_repeat,
 
 from .database import ConflictData, DatabaseError, save, load
 
+logger = logging.getLogger('repeater')
 
+log_handler = logging.FileHandler(f"{'repeater'}.log", mode='w', encoding='utf-8')
+log_formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+
+log_handler.setFormatter(log_formatter)
+log_handler.setLevel(logging.DEBUG)
+logger.addHandler(log_handler)
+logger.setLevel(logging.DEBUG)
 

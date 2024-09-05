@@ -1,5 +1,5 @@
-from .botMessage.dialog import Dialog
-from .botMessage.menu import menuMessage
+from .Dialog.dialog import Dialog
+from .Dialog.menu import menuMessage
 from . import bot
 import typing
 import logging
@@ -75,6 +75,18 @@ class UserChat:
         else:
             (logging.getLogger('bot').
              debug(f'callback: {button_callback} не обработан'))
+            bot.send_message(self.__chat, 'ошибка. Попробуйте заново')
+            self.menu()
+
+    def handle_user_document(self, document):
+        """обработать пользовательский ввод текста"""
+        if self.__active_dialog:  #если есть активное сообщение, обработать ответ
+            nm = self.__active_dialog.handle_document(document)
+            if issubclass(type(nm), Dialog): #установить следующее активное сообщение
+                self.start_dialog(nm)
+            elif not bool(nm):
+                self.menu()
+        else:
             bot.send_message(self.__chat, 'ошибка. Попробуйте заново')
             self.menu()
 

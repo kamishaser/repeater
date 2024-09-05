@@ -1,6 +1,7 @@
 import repeater
 from .dialog import Dialog
 from . import repeaterCommand
+from . import additionalFunctionality
 from telebot import types
 from bot import bot
 
@@ -64,6 +65,9 @@ class menuMessage(Dialog):
     if callback == 'topics_to_repeat':
       self.setPressedButtonValue('список тем для повторения')
       return self.get_list_of_topics_to_repeat()
+    if callback == 'other':
+      self.setPressedButtonValue('...')
+      return additionalFunctionality.AdditionalFunctionality(self.chat)
 
 
   def get_list_of_all_chapters(self):
