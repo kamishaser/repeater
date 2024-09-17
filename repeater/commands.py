@@ -200,3 +200,11 @@ def clear():
     chapter_dict.clear()
     topic_dict.clear()
 
+
+def set_repeat_counter(topic_name: str, value : int):
+    """установка счетчика повторений"""
+    checks.topic_exist(topic_name, True)
+    if value < 0:
+        raise checks.TopicError('счётчик повторений не может принимать отрицательные значения')
+    topic_dict[topic_name].repeat_counter = value
+

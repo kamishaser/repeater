@@ -53,7 +53,7 @@ class Dialog:
         for topic in topics:
             row.append(telebot.types.KeyboardButton(topic))
             counter += 1
-            if counter > 5:
+            if counter > 7:
                 break
         markup.add(*row)
         return markup
@@ -68,9 +68,17 @@ class Dialog:
         for topic in topics:
             row.append(telebot.types.KeyboardButton(topic))
             counter += 1
-            if counter > 5:
+            if counter > 7:
                 break
         markup.add(*row)
+        return markup
+
+    def get_button_cancel(self) -> telebot.types.ReplyKeyboardMarkup:
+        """кнопка отмены"""
+        markup = telebot.types.InlineKeyboardMarkup()
+        cancel = types.InlineKeyboardButton(
+            'отмена', callback_data='cancel')
+        markup.row(cancel)
         return markup
 
 

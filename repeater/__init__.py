@@ -17,9 +17,11 @@ from .commands import (
     change_name_of_topic, change_chapter_of_topic,
     change_questions_of_topic, change_answers_of_topic,
     change_note_of_topic, change_linc_dict_of_topic, add_linc_in_topic,
+    set_repeat_counter,
 
     add_chapter, del_chapter, clear,
     change_name_of_chapter, change_description_of_chapter,
+
 
     get_description_of_chapter,
     get_note_of_topic,

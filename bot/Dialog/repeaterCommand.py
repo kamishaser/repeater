@@ -11,13 +11,13 @@ class ChapterAddition(Dialog):
     self.__stage = 0
     self.__chapter_name = ''
     self.__chapter_description = ''
-    self.send_message('Введите имя для нового раздела')
+    self.send_message('Введите имя для нового раздела', self.get_button_cancel())
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
     if self.__stage == 0:
       self.__chapter_name = user_input
-      self.send_message('Введите описание для нового раздела')
+      self.send_message('Введите описание для нового раздела', self.get_button_cancel())
       self.__stage = 1
       return True
     elif self.__stage == 1:
@@ -123,7 +123,7 @@ class ChapterChanging(Dialog):
     except repeater.CorrectnessError as exc:
       bot.error(self.chat, f'имя некорректно: {exc}')
     else:
-      self.send_message(f'разделы успешно объединены')
+      #self.send_message(f'разделы успешно объединены')
       repeater.save()
 
   def delete_chapter(self):
@@ -148,7 +148,9 @@ class ChapterChanging(Dialog):
       'объединить с', callback_data='join')
     change_topic = types.InlineKeyboardButton(
       'удалить раздел', callback_data='delete')
-    markup.row(add_topic, change_topic)
+    cancel = types.InlineKeyboardButton(
+      'назад', callback_data='cancel')
+    markup.row(add_topic, change_topic, cancel)
     return markup
 
 ###################################################33#########################
@@ -160,7 +162,7 @@ class TopicAddition(Dialog):
     super().__init__(chat)
     self.__stage = 0
     self.__topic_name = ''
-    self.send_message('Введите название темы')
+    self.send_message('Введите название темы', self.get_button_cancel())
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
@@ -232,6 +234,8 @@ class TopicChanging(Dialog):
       self.duplicate(user_input)
     elif self.__stage == 'delete':
       self.delete_topic()
+    elif self.__stage == 'set_repeat_counter':
+      self.set_repeat_counter(user_input)
 
   def handle_button_callback(self, callback:str):
     """обработать нажатие кнопки"""
@@ -253,6 +257,10 @@ class TopicChanging(Dialog):
                        repeater.get_note_of_topic(self.__topic_name))
       self.send_message('введите новый текст темы')
       self.__stage = 'note'
+      return True
+    elif callback == 'set_repeat_counter':
+      self.send_message('введите число, сколько раз была повторена тема')
+      self.__stage = 'set_repeat_counter'
       return True
     elif callback == 'delete':
       self.delete_topic()
@@ -322,22 +330,37 @@ class TopicChanging(Dialog):
       self.send_message(f'тема "{self.__chapter_name}" успешно удалена')
       repeater.save()
 
+  def set_repeat_counter(self, user_input: str):
+    try:
+      repeater.set_repeat_counter(self.__topic_name, int(user_input))
+    except ValueError:
+      self.send_message(f'введено некорректное значение')
+    except repeater.TopicError as exc:
+      self.send_message(exc)
+
   def get_command_selection_markup(self):
     """получить меню действий"""
     markup = types.InlineKeyboardMarkup()
 
-    add_chapter = types.InlineKeyboardButton(
+    rename = types.InlineKeyboardButton(
       'переименовать', callback_data='name')
-    add_chapter = types.InlineKeyboardButton(
-      'сменить раздел', callback_data='chapter')
     change_chapter = types.InlineKeyboardButton(
+      'сменить раздел', callback_data='chapter')
+    change_text = types.InlineKeyboardButton(
       'изменить текст', callback_data='note')
-    markup.row(add_chapter, change_chapter)
-    add_topic = types.InlineKeyboardButton(
+    duplicate = types.InlineKeyboardButton(
       'дублировать', callback_data='duplicate')
-    change_topic = types.InlineKeyboardButton(
+    delete_topic = types.InlineKeyboardButton(
       'удалить', callback_data='delete')
-    markup.row(add_topic, change_topic)
+    set_repeat_counter = types.InlineKeyboardButton(
+      'изменить счетчик повторений', callback_data='set_repeat_counter')
+    cancel = types.InlineKeyboardButton(
+      'назад', callback_data='cancel')
+    markup.row(rename, change_chapter)
+    markup.row(change_text, duplicate)
+    markup.row(delete_topic, cancel)
+    markup.row(set_repeat_counter)
+
     return markup
 
   ###################################################33#########################
@@ -348,7 +371,8 @@ class ListOfTopicsInChapterPrinting(Dialog):
   """диалог вывода всех тем в определённо разделе"""
   def __init__(self, chat):
     super().__init__(chat)
-    self.send_message('Введите название раздела')
+    self.send_message('Введите название раздела', self.get_tip_on_choice_chapter())
+
 
   def handle_answer(self, user_input):
     """обработать пользовательский ввод"""
@@ -368,7 +392,7 @@ class ListOfTopicsInChapterPrinting(Dialog):
     text = f'список тем в разделе {chapter}:\n'
     t_list = repeater.topics_from_chapter(chapter)
     for name in t_list:
-      topic = (f'{counter}) {name}. '
+      topic = (f'--{counter}) {name}. '
                f'Изучена {repeater.get_date_of_study(name).strftime("%d.%m.%Y")} '
                f'Повторена {repeater.get_last_repeat_date(name).strftime("%d.%m.%Y")}\n')
       text = text + topic

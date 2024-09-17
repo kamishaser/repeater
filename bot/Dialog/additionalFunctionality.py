@@ -43,6 +43,8 @@ class AdditionalFunctionality(Dialog):
 							  'файла с сохранёнными тут, рекомендуется их устранить')
 			self.doc_loading = 1
 			return True
+		elif callback == 'cancel':
+			self.setPressedButtonValue('назад')
 		elif callback == 'ok':
 			self.setPressedButtonValue('да')
 			repeater.clear()
@@ -93,4 +95,8 @@ class AdditionalFunctionality(Dialog):
 		load_json = types.InlineKeyboardButton(
 			'загрузить json', callback_data='load_json')
 		markup.row(dump_json, load_json)
+
+		cancel = types.InlineKeyboardButton(
+			'назад', callback_data='cancel')
+		markup.row(cancel)
 		return markup
