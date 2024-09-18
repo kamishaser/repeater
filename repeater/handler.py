@@ -44,7 +44,7 @@ def record_repeat(name):
     topic = topic_dict[name]
     if checks.is_it_time_to_repeat(topic.last_repeat_date, topic.repeat_counter):
         topic.last_repeat_date = datetime.datetime.now()
-        topic.repeat_counter += 1
+        topic.repeat_counter = topic.repeat_counter + 1
     else:
         topic.last_repeat_date = datetime.datetime.now()
         raise checks.TopicError("тема повторена раньше времени. Счётчик не увеличился")
@@ -56,7 +56,7 @@ def topics_to_repeat() -> List[str]:
     """вывод списка тем подлежащих повторению"""
     r_list: List[str] = list()
     for name, data in topic_dict.items():
-        if checks.is_it_time_to_repeat(data.date_of_study, data.repeat_counter):
+        if checks.is_it_time_to_repeat(data.last_repeat_date, data.repeat_counter):
             r_list.append(name)
     r_list.sort(key=__sort_key)
     return r_list

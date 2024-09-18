@@ -11,9 +11,6 @@ class TopicData:
     date_of_study: datetime.datetime #дата изучения темы
     last_repeat_date: datetime.datetime #дата предыдущего повторения темы
     repeat_counter: int = 0 #счётчик повторений
-    link_dict: Optional[Dict[str, str]] = None #список ссылок
-    questions: str = ''#вопросы
-    answers: str = ''#ответы
 
     def __init__(self, data: Dict[str, Union[str, int, Dict[str, str]]]):
         """конструктор класса по словарю. Предпологается использование при загрузки из json"""
@@ -25,10 +22,6 @@ class TopicData:
         self.last_repeat_date = datetime.datetime.strptime(
             data['last_repeat_date'], '%d.%m.%Y %H:%M')
         self.repeat_counter = data['repeat_counter']
-
-        self.link_dict = data.get('linc_dict')
-        self.questions = data.get('questions')
-        self.answers = data.get('answers')
 
     def save(self, name : Optional[str] = None) -> Dict[str, Union[str, int, Dict[str, str]]]:
         """сохранение в словарь.
@@ -44,10 +37,6 @@ class TopicData:
         dict1['last_repeat_date'] = (
             self.last_repeat_date.strftime('%d.%m.%Y %H:%M'))
         dict1['repeat_counter'] = self.repeat_counter
-        dict1['linc_dict'] = self.link_dict
-        # необходимо вставить проверку
-        dict1['questions'] = self.questions
-        dict1['answers'] = self.answers
 
         return dict1
 

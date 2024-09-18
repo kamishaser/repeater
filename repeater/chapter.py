@@ -18,4 +18,3 @@ class Chapter:
 
 
 chapter_dict: Dict[str, Chapter] = dict()
-

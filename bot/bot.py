@@ -12,6 +12,8 @@ import requests
 
 __bot : telebot.TeleBot | None = None
 
+
+
 def start():
   """запуск бота"""
   global __bot
@@ -19,56 +21,76 @@ def start():
   with open('data/botData.json', 'r') as file:
     bot_data: dict = json.load(file)
 
-  assert bot_data.get('token')
-  __bot = telebot.TeleBot(bot_data['token'])
+  attempt_counter = 0
+  attempt_interval = datetime.timedelta(seconds=5)
+  attempt_time = datetime.datetime.now()-(attempt_interval*2)
+  while True:
+    try:
+      if attempt_counter > 3600:
+        logging.getLogger('bot').critical('timeout. потеряно интернет соединение')
+        break
+      if attempt_time < datetime.datetime.now() - attempt_interval:
+        attempt_time = datetime.datetime.now()
+        assert bot_data.get('token')
+        __bot = telebot.TeleBot(bot_data['token'])
 
-  @__bot.message_handler(commands=['start'])
-  def command(message):
-    """обработка ввода команды пользователем"""
-    print('start')
-    if message.chat.id in userChat.chats:
-      userChat.chats[message.chat.id].menu()
-    else:
-      print('new chat')
-      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+        @__bot.message_handler(commands=['start'])
+        def command(message):
+          """обработка ввода команды пользователем"""
+          print('start')
+          if message.chat.id in userChat.chats:
+            userChat.chats[message.chat.id].menu()
+          else:
+            print('new chat')
+            userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
 
-  @__bot.message_handler(content_types=['text'])
-  def user_text(message : telebot.types.Message):
-    """обработка ввода текста пользователем"""
-    if message.chat.id in userChat.chats:
-      userChat.chats[message.chat.id].handle_user_text(message.text)
-    else:
-      print('new chat')
-      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+        @__bot.message_handler(content_types=['text'])
+        def user_text(message: telebot.types.Message):
+          """обработка ввода текста пользователем"""
+          if message.chat.id in userChat.chats:
+            userChat.chats[message.chat.id].handle_user_text(message.text)
+          else:
+            print('new chat')
+            userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
 
-  @__bot.message_handler(content_types=['document'])
-  def user_document(message: telebot.types.Message):
-    """обработка отправленных файлов"""
-    logging.getLogger('bot').info(
-      f'пользователь {message.from_user.username} отправил документ')
-    if message.chat.id in userChat.chats:
-      userChat.chats[message.chat.id].handle_user_document(message.document)
-    else:
-      print('new chat')
-      userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+        @__bot.message_handler(content_types=['document'])
+        def user_document(message: telebot.types.Message):
+          """обработка отправленных файлов"""
+          logging.getLogger('bot').info(
+            f'пользователь {message.from_user.username} отправил документ')
+          if message.chat.id in userChat.chats:
+            userChat.chats[message.chat.id].handle_user_document(message.document)
+          else:
+            print('new chat')
+            userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
 
-  @__bot.callback_query_handler(func=lambda callback: True)
-  def callback_message(callback):
-    """обработка нажатия на кнопку"""
-    if callback.message.chat.id in userChat.chats:
-      (userChat.chats[callback.message.chat.id].
-       handle_button(callback.message, callback.data))
-    else:
-      userChat.chats[callback.message.chat.id] = (
-        userChat.UserChat(callback.message.chat))
+        @__bot.callback_query_handler(func=lambda callback: True)
+        def callback_message(callback):
+          """обработка нажатия на кнопку"""
+          if callback.message.chat.id in userChat.chats:
+            (userChat.chats[callback.message.chat.id].
+             handle_button(callback.message, callback.data))
+          else:
+            userChat.chats[callback.message.chat.id] = (
+              userChat.UserChat(callback.message.chat))
 
-  logging.getLogger('bot').log(logging.INFO, 'бот запущен')
-  try:
-    __bot.polling(none_stop=True)
-  except requests.exceptions.Timeout:
-    logging.getLogger('bot').log(logging.CRITICAL, 'потеряно интернет соединение')
-  except requests.exceptions.ConnectionError:
-    logging.getLogger('bot').log(logging.CRITICAL, 'нет интернета')
+        logging.getLogger('bot').log(logging.INFO, 'бот запущен')
+        attempt_counter = 0
+        __bot.polling(none_stop=True)
+        break
+
+    except requests.exceptions.Timeout:
+      logging.getLogger('bot').log(
+        logging.ERROR, 'потеряно интернет соединение: ', exc_info=True)
+      attempt_counter += 1
+    except requests.exceptions.ConnectionError:
+      logging.getLogger('bot').log(
+        logging.ERROR, 'ошибка подключения: ', exc_info=True)
+      attempt_counter += 1
+  logging.getLogger('bot').info('the end')
+
+
+
 
 
 def send_message(chat, text, markup = None):

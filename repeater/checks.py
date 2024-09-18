@@ -5,7 +5,7 @@ from .topicdata import TopicData, topic_dict
 from .chapter import Chapter, chapter_dict
 
 
-REPEAT_INTERVALS = (1, 3, 9, 17, 30, 120, 185, 365)
+REPEAT_INTERVALS = (1, 3, 9, 17, 30, 60, 120, 185, 365)
 MIN_NAME_LENGTH = 4
 MAX_NAME_LENGTH = 60
 
@@ -104,7 +104,7 @@ def next_repeat_date(
         last_repeat_date: datetime.datetime, repeat_counter: int) -> datetime.datetime:
     """дата следующего повторения темы"""
     return last_repeat_date + datetime.timedelta(
-        days=REPEAT_INTERVALS[repeat_counter] if repeat_counter < 7 else 365)
+        days=REPEAT_INTERVALS[repeat_counter] if repeat_counter < 8 else 365)
 
 
 def is_it_time_to_repeat(
