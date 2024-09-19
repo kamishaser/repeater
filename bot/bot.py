@@ -43,6 +43,8 @@ def start():
           else:
             print('new chat')
             userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+          nonlocal attempt_counter
+          attempt_counter = 0 #crutch
 
         @__bot.message_handler(content_types=['text'])
         def user_text(message: telebot.types.Message):
@@ -52,6 +54,8 @@ def start():
           else:
             print('new chat')
             userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+          nonlocal attempt_counter
+          attempt_counter = 0 #crutch
 
         @__bot.message_handler(content_types=['document'])
         def user_document(message: telebot.types.Message):
@@ -63,6 +67,8 @@ def start():
           else:
             print('new chat')
             userChat.chats[message.chat.id] = userChat.UserChat(message.chat)
+          nonlocal attempt_counter
+          attempt_counter = 0 #crutch
 
         @__bot.callback_query_handler(func=lambda callback: True)
         def callback_message(callback):
@@ -73,19 +79,26 @@ def start():
           else:
             userChat.chats[callback.message.chat.id] = (
               userChat.UserChat(callback.message.chat))
+          nonlocal attempt_counter
+          attempt_counter = 0 #crutch
 
         logging.getLogger('bot').log(logging.INFO, 'бот запущен')
-        attempt_counter = 0
         __bot.polling(none_stop=True)
         break
 
     except requests.exceptions.Timeout:
-      logging.getLogger('bot').log(
-        logging.ERROR, 'потеряно интернет соединение: ', exc_info=True)
+      if attempt_counter < 2:
+        logging.getLogger('bot').log(
+          logging.ERROR, 'потеряно интернет соединение: ', exc_info=True)
+      else:
+        logging.getLogger('bot').info(attempt_counter)
       attempt_counter += 1
     except requests.exceptions.ConnectionError:
-      logging.getLogger('bot').log(
-        logging.ERROR, 'ошибка подключения: ', exc_info=True)
+      if attempt_counter < 2:
+        logging.getLogger('bot').log(
+          logging.ERROR, 'ошибка подключения: ', exc_info=True)
+      else:
+        logging.getLogger('bot').info(attempt_counter)
       attempt_counter += 1
   logging.getLogger('bot').info('the end')
 
